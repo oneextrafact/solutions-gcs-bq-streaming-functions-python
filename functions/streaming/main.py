@@ -27,6 +27,10 @@ import logging
 import os
 import traceback
 from datetime import datetime
+from io import BytesIO
+import pandas as pd
+import numpy as np
+import zipfile
 
 from google.api_core import retry
 from google.cloud import bigquery
@@ -76,18 +80,55 @@ def _handle_duplication(db_ref):
     db_ref.update({
         'duplication_attempts': dups
     })
-    logging.warn('Duplication attempt streaming file \'%s\'' % db_ref.id)
+    logging.warning('Duplication attempt streaming file \'%s\'' % db_ref.id)
 
 
 def _insert_into_bigquery(bucket_name, file_name):
     blob = CS.get_bucket(bucket_name).blob(file_name)
-    row = json.loads(blob.download_as_string())
+
+    # extract the ZipFile and read the columns we need from it.
+    try:
+        zf = zipfile.ZipFile(BytesIO(blob.download_as_string()))
+
+        schema = {
+            'BUSTOOLS_VERSION': np.str,
+            'ROUTE_ID': np.str,
+            'STOP_SEQUENCE': np.float,
+            'BUS_ID': np.str,
+            'EVENT_TIME': np.str,
+            'EVENT_TIME_UTC': np.str,
+            'ODOMETER_DISTANCE': np.float,
+            'OPERATOR_ID': np.str,
+            'EVENT_TYPE': np.float,
+            'PASSENGER_LOAD': np.float,
+            'BLOCK_ID': np.float,
+            'TRIP_KEY': np.float,
+            'TRIP_START_TIME': np.str,
+            'ODOMETER_CUMULATIVE': np.float,
+            'WORK_SCHED_DATE': np.str,
+            'STATEOFCHARGE': np.float
+        }
+
+        df = pd.read_csv(zf.open(zf.infolist()[0]), delimiter=',',
+                         error_bad_lines=False,
+                         usecols=schema.keys(),
+                         dtype=schema)
+        df['EVENT_TIME'] = df.EVENT_TIME.apply(lambda x: pd.to_datetime(x, format='%y%m%d%H%M%S', errors='coerce'))
+        df['EVENT_TIME_UTC'] = df.EVENT_TIME_UTC.apply(lambda x: pd.to_datetime(x, format='%y%m%d%H%M%S', errors='coerce'))
+        df['TRIP_START_TIME'] = df.TRIP_START_TIME.apply(lambda x: pd.to_datetime(x, format='%y%m%d%H%M%S', errors='coerce'))
+        df['WORK_SCHED_DATE'] = df.WORK_SCHED_DATE.apply(lambda x: pd.to_datetime(x, format='%y%m%d', errors='coerce'))
+    except IOError as e:
+        raise PandasError(e)
+    except zipfile.BadZipFile as e:
+        raise PandasError(e)
+
+    row = df.to_json(orient='records')
     table = BQ.dataset(BQ_DATASET).table(BQ_TABLE)
     errors = BQ.insert_rows_json(table,
                                  json_rows=[row],
                                  row_ids=[file_name],
                                  retry=retry.Retry(deadline=30))
-    if errors != []:
+    if errors:
         raise BigQueryError(errors)
 
 
@@ -124,6 +165,18 @@ class BigQueryError(Exception):
     def __init__(self, errors):
         super().__init__(self._format(errors))
         self.errors = errors
+
+    def _format(self, errors):
+        err = []
+        for error in errors:
+            err.extend(error['errors'])
+        return json.dumps(err)
+
+
+class PandasError(Exception):
+    '''Exception raised for an inability to parse the file'''
+    def __init__(self, errors):
+        super().__init__(self._format(errors))
 
     def _format(self, errors):
         err = []

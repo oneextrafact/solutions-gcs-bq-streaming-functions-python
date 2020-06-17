@@ -1,59 +1,66 @@
 [
     {
-        "name": "id",
+        "name": "BUSTOOLS_VERSION",
+        "type": "STRING"
+    },
+    {
+        "name": "ROUTE_ID",
+        "type": "STRING"
+    },
+    {
+        "name": "STOP_SEQUENCE",
+        "type": "INT64"
+    },
+    {
+        "name": "BUS_ID",
         "type": "STRING",
-        "mode": "NULLABLE"
     },
     {
-        "name": "first_name",
-        "type": "STRING",
-        "mode": "NULLABLE"
+        "name": "EVENT_TIME",
+        "type": "DATE"
     },
     {
-        "name": "last_name",
-        "type": "STRING",
-        "mode": "NULLABLE"
+        "name": "EVENT_TIME_UTC",
+        "type": "DATE"
     },
     {
-        "name": "dob",
-        "type": "DATE",
-        "mode": "NULLABLE"
+        "name": "ODOMETER_DISTANCE",
+        "type": "INT64"
     },
     {
-        "name": "addresses",
-        "type": "RECORD",
-        "mode": "REPEATED",
-        "fields": [
-            {
-                "name": "status",
-                "type": "STRING",
-                "mode": "NULLABLE"
-            },
-            {
-                "name": "address",
-                "type": "STRING",
-                "mode": "NULLABLE"
-            },
-            {
-                "name": "city",
-                "type": "STRING",
-                "mode": "NULLABLE"
-            },
-            {
-                "name": "state",
-                "type": "STRING",
-                "mode": "NULLABLE"
-            },
-            {
-                "name": "zip",
-                "type": "STRING",
-                "mode": "NULLABLE"
-            },
-            {
-                "name": "numberOfYears",
-                "type": "STRING",
-                "mode": "NULLABLE"
-            }
-        ]
+        "name": "OPERATOR_ID",
+        "type": "STRING"
+    },
+    {
+        "name": "EVENT_TYPE",
+        "type": "INT64"
+    },
+    {
+        "name": "PASSENGER_LOAD",
+        "type": "INT64"
+    },
+    {
+        "name": "BLOCK_ID",
+        "type": "INT64"
+    },
+    {
+        "name": "TRIP_KEY",
+        "type": "INT64"
+    },
+    {
+        "name": "TRIP_START_TIME",
+        "type": "DATE"
+    },
+    {
+        "name": "ODOMETER_CUMULATIVE",
+        "type": "INT64"
+    },
+    {
+        "name": "WORK_SCHED_DATE",
+        "type": "DATE"
+    },
+    {
+        "name": "STATE_OF_CHARGE",
+        "type": "INT64"
     }
 ]
