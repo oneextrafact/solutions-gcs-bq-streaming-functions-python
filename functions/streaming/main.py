@@ -112,7 +112,8 @@ def _insert_into_bigquery(bucket_name, file_name):
         df = pd.read_csv(zf.open(zf.infolist()[0]), delimiter=',',
                          error_bad_lines=False,
                          usecols=schema.keys(),
-                         dtype=schema)
+                         dtype=schema,
+                         skiprows=[1])
         df['EVENT_TIME'] = df.EVENT_TIME.apply(lambda x: pd.to_datetime(x, format='%y%m%d%H%M%S', errors='coerce'))
         df['EVENT_TIME_UTC'] = df.EVENT_TIME_UTC.apply(lambda x: pd.to_datetime(x, format='%y%m%d%H%M%S', errors='coerce'))
         df['TRIP_START_TIME'] = df.TRIP_START_TIME.apply(lambda x: pd.to_datetime(x, format='%y%m%d%H%M%S', errors='coerce'))

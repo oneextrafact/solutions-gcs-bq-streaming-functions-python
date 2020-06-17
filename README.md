@@ -1,6 +1,6 @@
 # Streaming data from Cloud Storage into BigQuery using Cloud Functions
 This code looks at a complete ingest pipeline all the way from capturing streaming events 
-(upload of files to Cloud Storage), to doing basic processing, errorm handling, logging and 
+(upload of files to Cloud Storage), to doing basic processing, error handling, logging and 
 insert stream to bigquery. The example captures events from a bucket (object create) with 
 Cloud Function, reads the file and stream the content (JSON) to a table in BigQuery. 
 If something goes wrong, the function logs the results in Cloud Logging and Firestore, for post analysis. 
