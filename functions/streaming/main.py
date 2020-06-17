@@ -123,10 +123,11 @@ def _insert_into_bigquery(bucket_name, file_name):
         raise PandasError(e)
 
     rows = json.loads(df.to_json(orient='records'))
+    row_ids = ["{}_{}".format(file_name, str(i).rjust(5,'0')) for i, _ in enumerate(rows)]
     table = BQ.dataset(BQ_DATASET).table(BQ_TABLE)
     errors = BQ.insert_rows_json(table,
                                  json_rows=rows,
-                                 row_ids=[file_name],
+                                 row_ids=row_ids,
                                  retry=retry.Retry(deadline=30))
     if errors:
         raise BigQueryError(errors)
