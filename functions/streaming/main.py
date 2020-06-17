@@ -113,10 +113,15 @@ def _insert_into_bigquery(bucket_name, file_name):
                          usecols=schema.keys(),
                          dtype=schema,
                          skiprows=[1])
-        df['EVENT_TIME'] = df.EVENT_TIME.apply(lambda x: pd.to_datetime(x, format='%y%m%d%H%M%S', errors='coerce'))
-        df['EVENT_TIME_UTC'] = df.EVENT_TIME_UTC.apply(lambda x: pd.to_datetime(x, format='%y%m%d%H%M%S', errors='coerce'))
-        df['TRIP_START_TIME'] = df.TRIP_START_TIME.apply(lambda x: pd.to_datetime(x, format='%y%m%d%H%M%S', errors='coerce'))
-        df['WORK_SCHED_DATE'] = df.WORK_SCHED_DATE.apply(lambda x: pd.to_datetime(x, format='%y%m%d', errors='coerce'))
+        df['EVENT_TIME'] = df.EVENT_TIME.apply(lambda x: pd.to_datetime(
+            x, format='%y%m%d%H%M%S', errors='coerce')).dt.strftime('%Y-%m-%d %H:%M:%S')
+        df['EVENT_TIME_UTC'] = df.EVENT_TIME_UTC.apply(lambda x: pd.to_datetime(
+            x, format='%y%m%d%H%M%S', errors='coerce')).dt.strftime('%Y-%m-%d %H:%M:%SZ')
+        df['TRIP_START_TIME'] = df.TRIP_START_TIME.apply(lambda x: pd.to_datetime(
+            x, format='%y%m%d%H%M%S', errors='coerce')).dt.strftime('%Y-%m-%d %H:%M:%S')
+        df['WORK_SCHED_DATE'] = df.WORK_SCHED_DATE.apply(lambda x: pd.to_datetime(
+            x, format='%y%m%d', errors='coerce')).dt.strftime('%Y-%m-%d %H:%M:%S')
+        df.rename({'STATEOFCHARGE': 'STATE_OF_CHARGE'}, axis=1, inplace=True)
     except IOError as e:
         raise PandasError(e)
     except zipfile.BadZipFile as e:

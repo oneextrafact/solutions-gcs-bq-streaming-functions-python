@@ -17,11 +17,11 @@
     },
     {
         "name": "EVENT_TIME",
-        "type": "DATE"
+        "type": "DATETIME"
     },
     {
         "name": "EVENT_TIME_UTC",
-        "type": "DATE"
+        "type": "TIMESTAMP"
     },
     {
         "name": "ODOMETER_DISTANCE",
@@ -49,7 +49,7 @@
     },
     {
         "name": "TRIP_START_TIME",
-        "type": "DATE"
+        "type": "DATETIME"
     },
     {
         "name": "ODOMETER_CUMULATIVE",
