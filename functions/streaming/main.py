@@ -122,10 +122,10 @@ def _insert_into_bigquery(bucket_name, file_name):
     except zipfile.BadZipFile as e:
         raise PandasError(e)
 
-    row = df.to_json(orient='records')
+    rows = json.loads(df.to_json(orient='records'))
     table = BQ.dataset(BQ_DATASET).table(BQ_TABLE)
     errors = BQ.insert_rows_json(table,
-                                 json_rows=[row],
+                                 json_rows=rows,
                                  row_ids=[file_name],
                                  retry=retry.Retry(deadline=30))
     if errors:
