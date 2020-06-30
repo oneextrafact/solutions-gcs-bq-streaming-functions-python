@@ -31,7 +31,6 @@ def weather(request):
 
     # get the forecast
     lat_lon_str_escaped = os.getenv("LAT_LON_STR")
-    logging.info(lat_lon_str_escaped)
     forecast_url = (
         """https://graphical.weather.gov/xml/sample_products/browser_interface/ndfdXMLclient.php?"""
         """whichClient=NDFDgenLatLonList"""
@@ -46,6 +45,7 @@ def weather(request):
         response_xml = ElementTree.fromstring(response.content)
         forecast_time = response_xml.find('head').find('product').find('creation-date').text
     else:
+        logging.error("Non-success return code from NDFD request")
         raise RuntimeError('Non-success return code from NDFD request')
 
     # see if we have already seen this record
@@ -58,6 +58,7 @@ def weather(request):
             _insert_into_bigquery(response_xml, forecast_time)
             _handle_success(db_ref)
         except Exception:
+            logging.error("Could not insert into BigQuery")
             _handle_error(db_ref)
 
 
