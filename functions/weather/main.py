@@ -1,6 +1,7 @@
 import os
 import json
 from google.cloud import bigquery
+from google.cloud import error_reporting
 from google.api_core import retry
 from google.cloud import firestore
 from xml.etree import ElementTree
@@ -17,6 +18,7 @@ BQ_DATASET = 'vta_vs'
 BQ_TABLE = 'weather_forecast'
 BQ = bigquery.Client()
 DB = firestore.Client()
+client = error_reporting.Client()
 
 
 def weather(request):
@@ -29,6 +31,7 @@ def weather(request):
 
     # get the forecast
     lat_lon_str_escaped = os.getenv("LAT_LON_STR")
+    logging.info(lat_lon_str_escaped)
     forecast_url = (
         """https://graphical.weather.gov/xml/sample_products/browser_interface/ndfdXMLclient.php?"""
         """whichClient=NDFDgenLatLonList"""
@@ -43,7 +46,7 @@ def weather(request):
         response_xml = ElementTree.fromstring(response.content)
         forecast_time = response_xml.find('head').find('product').find('creation-date').text
     else:
-        raise Exception
+        raise RuntimeError('Non-success return code from NDFD request')
 
     # see if we have already seen this record
     db_ref = DB.document(u'weather_forecasts/%s' % forecast_time)
