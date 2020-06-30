@@ -42,6 +42,7 @@ def weather(request):
         """&Submit=Submit""").format(lat_lon_str_escaped)
     response = requests.get(forecast_url)
     if response.status_code == 200:
+        logging.info("Downloaded forecast.")
         response_xml = ElementTree.fromstring(response.content)
         forecast_time = response_xml.find('head').find('product').find('creation-date').text
     else:
@@ -49,12 +50,14 @@ def weather(request):
         raise RuntimeError('Non-success return code from NDFD request')
 
     # see if we have already seen this record
+    logging.info("Checking for duplicates.")
     db_ref = DB.document(u'weather_forecasts/%s' % forecast_time)
     if _was_already_ingested(db_ref):
         logging.warning('Duplication attempt streaming file \'%s\'' % db_ref.id)
         return
     else:
         try:
+            logging.info("Inserting into BigQuery.")
             _insert_into_bigquery(response_xml, forecast_time)
             _handle_success(db_ref)
         except Exception:
