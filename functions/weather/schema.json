@@ -1,0 +1,22 @@
+[
+    {
+        "name": "point_name",
+        "type": "STRING"
+    },
+    {
+        "name": "time",
+        "type": "TIMESTAMP"
+    },
+    {
+        "name": "forecast_time",
+        "type": "TIMESTAMP"
+    },
+    {
+        "name": "temperature_c",
+        "type": "INTEGER"
+    },
+    {
+        "name": "pop12",
+        "type": "INTEGER"
+    }
+]
