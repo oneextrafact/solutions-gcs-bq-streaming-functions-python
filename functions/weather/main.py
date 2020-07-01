@@ -96,6 +96,7 @@ def _handle_error(db_ref):
 
 
 def _insert_into_bigquery(weather_xml, forecast_time):
+    logging.info("Processing frame")
     tree = weather_xml.find('data')
     time_layouts_df = pd.DataFrame()
     for time_layout in tree.findall('time-layout'):
@@ -132,14 +133,22 @@ def _insert_into_bigquery(weather_xml, forecast_time):
     parameters_df['temperature_c'] = parameters_df['Temperature (Celsius)']
     parameters_df['pop12'] = parameters_df['12 Hourly Probability of Precipitation (percent)']
 
-    rows = json.loads(parameters_df.to_json(orient='records'))
+    rows = json.loads(parameters_df[[
+        'point_name',
+        'time',
+        'forecast_time',
+        'temperature_c',
+        'pop12'
+    ]].to_json(orient='records'))
     row_ids = [forecast_time]
     table = BQ.dataset(BQ_DATASET).table(BQ_TABLE)
+    logging.info("Starting insert into BigQuery")
     errors = BQ.insert_rows_json(table,
                                  json_rows=rows,
                                  row_ids=row_ids,
                                  retry=retry.Retry(deadline=30))
     if errors:
+        logging.error(errors)
         raise BigQueryError(errors)
 
 
