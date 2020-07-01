@@ -96,9 +96,10 @@ def _handle_error(db_ref):
 
 
 def _insert_into_bigquery(weather_xml, forecast_time):
-    logging.info("Processing frame")
+
     tree = weather_xml.find('data')
     time_layouts_df = pd.DataFrame()
+    logging.info("Processing time")
     for time_layout in tree.findall('time-layout'):
         time_layouts = []
         time_layout_key = time_layout.find('layout-key').text
@@ -108,6 +109,7 @@ def _insert_into_bigquery(weather_xml, forecast_time):
                                  'time': dateutil.parser.parse(start_time.text)})
         time_layouts_df = pd.concat([time_layouts_df, pd.DataFrame(time_layouts)])
 
+    logging.info("Processing parameters")
     parameters_df = pd.DataFrame()
     for parameter in tree.findall('parameters'):
         point_name = parameter.attrib['applicable-location']
@@ -133,6 +135,7 @@ def _insert_into_bigquery(weather_xml, forecast_time):
     parameters_df['temperature_c'] = parameters_df['Temperature (Celsius)']
     parameters_df['pop12'] = parameters_df['12 Hourly Probability of Precipitation (percent)']
 
+    logging.info("Converting rows to json")
     rows = json.loads(parameters_df[[
         'point_name',
         'time',
